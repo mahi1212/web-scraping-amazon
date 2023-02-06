@@ -35,30 +35,44 @@
 // // scrapeProduct('https://www.amazon.com/2022-Apple-MacBook-Laptop-chip/dp/B0B3C7MJX3/ref=sr_1_1?keywords=apple+mackbook%5C&qid=1675681752&sr=8-1');
 
 const puppeteer = require('puppeteer');
-require('dotenv').config()
 
 async function scrapeProducts(url) {
-const browser = await puppeteer.launch();
-const page = await browser.newPage();
-await page.goto(url);
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.goto(url);
 
-const products = await page.$$('.s-result-item');
-for (const product of products) {
-const titleElement = await product.$('.a-size-medium');
-const priceElement = await product.$('.a-price-whole');
+  const products = await page.$$('.s-result-item');
+  products.length = 10;
+  for (const product of products) {
+    const titleElement = await product.$('.a-size-medium');
+    const priceElement = await product.$('.a-price-whole');
+    const nameElement = await product.$('.a-color-base');
+    const imageElement = await product.$('.s-image');
 
-if (titleElement && priceElement) {
-  const title = await titleElement.getProperty('textContent');
-  const titleValue = await title.jsonValue();
+    if (titleElement) {
+      const title = await titleElement.getProperty('textContent');
+      const titleValue = await title.jsonValue();
+      console.log(`Title: ${titleValue}`);
+    }
+    if (nameElement) {
+      const name = await nameElement.getProperty('textContent');
+      const nameValue = await name.jsonValue();
+      console.log(`Name: ${nameValue}`);
+    }
+    if (priceElement) {
+      const price = await priceElement.getProperty('textContent');
+      const priceValue = await price.jsonValue();
+      console.log(`Price: ${priceValue}`);
+    }
+    if (imageElement) {
+      const image = await imageElement.getProperty('src');
+      const imageValue = await image.jsonValue();
+      console.log(`Image: ${imageValue}`);
+    }
+    console.log('---------------------');
+  }
 
-  const price = await priceElement.getProperty('textContent');
-  const priceValue = await price.jsonValue();
-
-  console.log(`Title: ${titleValue}, Price: ${priceValue}`);
+  await browser.close();
 }
-}
 
-await browser.close();
-}
-
-scrapeProducts('https://www.amazon.com/s?k=apple+mackbook&crid=1GNUHJVU4750E&sprefix=apple+macbook%2Caps%2C344&ref=nb_sb_noss_1');
+scrapeProducts('https://www.amazon.com/s?k=car+toy&crid=1TK2REW711M02&sprefix=car+to%2Caps%2C630&ref=nb_sb_noss_2');
